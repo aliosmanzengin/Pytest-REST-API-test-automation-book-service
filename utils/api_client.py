@@ -25,4 +25,22 @@ class APIClient:
         url = f"{self.base_url}/{endpoint}"
         logger.info(f"POST {url}")
         response = self.session.post(url, data=data, json=json, headers=headers, timeout=self.timeout)
-        response.raise_
+        response.raise_for_status()
+        logger.info(f"Response: {response.status_code} {response.json()}")
+        return response.json()
+
+    def delete(self, endpoint, params=None, headers=None):
+        url = f"{self.base_url}/{endpoint}"
+        logger.info(f"DELETE {url}")
+        response = self.session.delete(url, params=params, headers=headers, timeout=self.timeout)
+        response.raise_for_status()
+        logger.info(f"Response: {response.status_code} {response.json()}")
+        return response.json()
+
+    def put(self, endpoint, data=None, json=None, headers=None):
+        url = f"{self.base_url}/{endpoint}"
+        logger.info(f"PUT {url}")
+        response = self.session.put(url, data=data, json=json, headers=headers, timeout=self.timeout)
+        response.raise_for_status()
+        logger.info(f"Response: {response.status_code} {response.json()}")
+        return response.json()
