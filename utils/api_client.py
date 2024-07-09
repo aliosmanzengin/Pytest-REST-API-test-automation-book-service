@@ -1,33 +1,19 @@
 """
-utils/api_client.py
+api_client.py
 
-/v1/books/manipulation POST - Add book with no arguments but request payload as json contains fields (type, title, creation date)
-/v1/books/manipulation DELETE - Delete book with arguments (id)
-/v1/books/manipulation PUT - Change the name of the book with arguments (id) (NOTE: updated time should be changed as well)
-/v1/books/manipulation GET - Returns “No implementation for GET method”
-/v1/books/latest GET - Get all the latest added books limited by some amount with arguments (limit)
-/v1/books/info GET - Get info(type, name etc …) about a book with arguments (ID)
-/v1/books/ids GET - Get all ID of books by type with arguments (book_type)
-example: http://127.0.0.1:5000/v1/books/ids?book_type=Satire
-[
-    {
-        "type": "Satire",
-        "title": "Book2",
-        "id": "431d9caa-1cef-4408-a5a8-835d447b63f5",
-        "creation_date": "2021-01-02",
-        "updated_date_time": "2024-07-09T09:58:46.374373"
-    }
-]
+This module contains the APIClient class for interacting with the Books API. It provides methods for
+sending GET, POST, DELETE, and PUT requests.
 
-Examples of requests:
+Classes:
+    APIClient: A client for interacting with the Books API.
 
-$ curl http://127.0.0.1:5000/v1/books/latest?limit=1
-
-$ curl http://127.0.0.1:5000/v1/books/info?id=1cabb8d8-cea1-47eb-9282-f688886f9011
-
-$ curl -d '{"title":"Book1", "type":"Satire", "creation_date":"2021-01-02"}' -H "Content-Type: application/json" -X POST http://127.0.0.1:5000/v1/books/manipulation -vvv
-
+Functions:
+    get: Sends a GET request to the API.
+    post: Sends a POST request to the API.
+    delete: Sends a DELETE request to the API.
+    put: Sends a PUT request to the API.
 """
+
 import requests
 from utils.config import BASE_URL, TIMEOUT
 import logging
@@ -37,12 +23,39 @@ logger = logging.getLogger(__name__)
 
 
 class APIClient:
+    """
+    A client for interacting with the Books API.
+
+    Attributes:
+        base_url (str): The base URL for the API.
+        timeout (int): The timeout for API requests.
+        session (requests.Session): The session object for making requests.
+    """
+
     def __init__(self, base_url: str = BASE_URL, timeout: int = TIMEOUT):
+        """
+        Initializes the APIClient with the given base URL and timeout.
+
+        Args:
+            base_url (str): The base URL for the API. Defaults to BASE_URL.
+            timeout (int): The timeout for API requests. Defaults to TIMEOUT.
+        """
         self.base_url = base_url
         self.timeout = timeout
         self.session = requests.Session()
 
     def get(self, endpoint: str, params: dict = None, headers: dict = None) -> requests.Response:
+        """
+        Sends a GET request to the API.
+
+        Args:
+            endpoint (str): The API endpoint.
+            params (dict, optional): The query parameters for the request. Defaults to None.
+            headers (dict, optional): The headers for the request. Defaults to None.
+
+        Returns:
+            requests.Response: The response object from the API request.
+        """
         url = f"{self.base_url}/{endpoint}"
         logger.info(f"GET {url}")
         response = self.session.get(url, params=params, headers=headers, timeout=self.timeout)
@@ -51,6 +64,18 @@ class APIClient:
         return response
 
     def post(self, endpoint: str, data: dict = None, json: dict = None, headers: dict = None) -> requests.Response:
+        """
+        Sends a POST request to the API.
+
+        Args:
+            endpoint (str): The API endpoint.
+            data (dict, optional): The form data for the request. Defaults to None.
+            json (dict, optional): The JSON payload for the request. Defaults to None.
+            headers (dict, optional): The headers for the request. Defaults to None.
+
+        Returns:
+            requests.Response: The response object from the API request.
+        """
         url = f"{self.base_url}/{endpoint}"
         logger.info(f"POST {url}")
         response = self.session.post(url, data=data, json=json, headers=headers, timeout=self.timeout)
@@ -59,6 +84,17 @@ class APIClient:
         return response
 
     def delete(self, endpoint: str, params: dict = None, headers: dict = None) -> requests.Response:
+        """
+        Sends a DELETE request to the API.
+
+        Args:
+            endpoint (str): The API endpoint.
+            params (dict, optional): The query parameters for the request. Defaults to None.
+            headers (dict, optional): The headers for the request. Defaults to None.
+
+        Returns:
+            requests.Response: The response object from the API request.
+        """
         url = f"{self.base_url}/{endpoint}"
         logger.info(f"DELETE {url}")
         response = self.session.delete(url, params=params, headers=headers, timeout=self.timeout)
@@ -67,6 +103,19 @@ class APIClient:
         return response
 
     def put(self, endpoint: str, params: dict = None, data: dict = None, json: dict = None, headers: dict = None) -> requests.Response:
+        """
+        Sends a PUT request to the API.
+
+        Args:
+            endpoint (str): The API endpoint.
+            params (dict, optional): The query parameters for the request. Defaults to None.
+            data (dict, optional): The form data for the request. Defaults to None.
+            json (dict, optional): The JSON payload for the request. Defaults to None.
+            headers (dict, optional): The headers for the request. Defaults to None.
+
+        Returns:
+            requests.Response: The response object from the API request.
+        """
         url = f"{self.base_url}/{endpoint}"
         logger.info(f"PUT {url}")
         response = self.session.put(url, params=params, data=data, json=json, headers=headers, timeout=self.timeout)
