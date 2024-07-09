@@ -68,3 +68,6 @@ reports/
 
 # VS Code
 .vscode/
+
+
+.idea/
