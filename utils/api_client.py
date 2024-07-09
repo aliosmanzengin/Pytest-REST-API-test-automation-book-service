@@ -1,6 +1,6 @@
 # utils/api_client.py
 import requests
-from config import BASE_URL, TIMEOUT
+from utils.config import BASE_URL, TIMEOUT
 import logging
 
 logging.basicConfig(level=logging.INFO)

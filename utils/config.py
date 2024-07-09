@@ -1,2 +1,2 @@
-BASE_URL = "https://api.example.com"
+BASE_URL = "http://localhost:5000/v1/books"
 TIMEOUT = 5
