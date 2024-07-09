@@ -1,4 +1,6 @@
 # conftest.py
+import csv
+
 import pytest
 
 from tests.helpers import delete_book, add_book, remove_all_books
@@ -13,4 +15,4 @@ def api_client():
 @pytest.fixture(scope='session', autouse=True)
 def teardown(api_client):
     yield
-    remove_all_books
+    remove_all_books(api_client)

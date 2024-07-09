@@ -1,4 +1,9 @@
-import uuid
+"""
+helpers.py
+"""
+import requests
+
+from utils.api_client import logger
 
 
 def add_book(api_client, title, book_type, creation_date):
@@ -43,12 +48,19 @@ def get_book_info(api_client, book_id):
 
 
 def get_all_books(api_client):
-    response = api_client.get('ids', params={})
-    response.raise_for_status()
-    return response.json()
+    all_books_ids = []
+    book_types = ['Science', 'Satire', 'Drama', 'Romance']  # Add all possible book types here
+    for book_type in book_types:
+        response = api_client.get('ids', params={'book_type': book_type})
+        response.raise_for_status()
+        all_books_ids.extend(response.json())
+    return all_books_ids
 
 
 def remove_all_books(api_client):
     all_books_ids = get_all_books(api_client)
     for book in all_books_ids:
-        delete_book(api_client, book[id])
+        try:
+            delete_book(api_client, book['id'])
+        except requests.exceptions.HTTPError as e:
+            logger.error(f"Failed to delete book with ID {book['id']}: {e}")

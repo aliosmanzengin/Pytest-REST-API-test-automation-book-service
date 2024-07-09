@@ -1,3 +1,5 @@
+"""tests/booking_api.py"""
+import csv
 import pytest
 import allure
 from assertpy import assert_that
@@ -6,17 +8,27 @@ import requests.exceptions
 from tests.helpers import add_book, delete_book, update_book, get_latest_books, get_book_info, get_books_by_type
 
 
+def read_test_data():
+    file_path = 'books_test_data.csv'
+    with open(file_path, mode='r') as file:
+        reader = csv.DictReader(file)
+        data = [(row['title'], row['type'], row['creation_date']) for row in reader]
+        print(f"Loaded test data: {data}")  # Debugging line to verify data loading
+        return data
+
+
 @allure.feature('Books API')
 class TestBooksAPI:
 
     @allure.story('Add Book')
-    def test_add_new_book(self, api_client):
-        response = add_book(api_client, 'Book1', 'Satire', '2021-01-02')
+    @pytest.mark.parametrize("title,book_type,creation_date", read_test_data())
+    def test_add_new_book(self, api_client, title, book_type, creation_date):
+        response = add_book(api_client, title, book_type, creation_date)
         assert_that(response.status_code).is_equal_to(200)
         response_json = response.json()
-        assert_that(response_json['title']).is_equal_to('Book1')
-        assert_that(response_json['type']).is_equal_to('Satire')
-        assert_that(response_json['creation_date']).is_equal_to('2021-01-02')
+        assert_that(response_json['title']).is_equal_to(title)
+        assert_that(response_json['type']).is_equal_to(book_type)
+        assert_that(response_json['creation_date']).is_equal_to(creation_date)
         assert_that(response_json['id']).is_not_empty()
 
     @allure.story('Delete Book')
@@ -120,3 +132,11 @@ class TestBooksAPI:
         response = exc_info.value.response
         assert_that(response.status_code).is_equal_to(400)
         assert_that(response.json()['message']).is_equal_to('The book entity is not valid.')
+
+    @allure.story('Invalid GET Method on Manipulation Endpoint')
+    def test_invalid_get_on_manipulation(self, api_client):
+        with pytest.raises(requests.exceptions.HTTPError) as exc_info:
+            api_client.get('manipulation')
+        response = exc_info.value.response
+        assert_that(response.status_code).is_equal_to(405)
+        assert_that(response.json()['message']).is_equal_to('No implementation for `GET` method')
