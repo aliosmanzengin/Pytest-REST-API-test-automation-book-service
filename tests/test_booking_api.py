@@ -6,52 +6,45 @@ from datetime import datetime
 import uuid
 import requests.exceptions  # This is the required import
 
+from tests.helpers import add_book, delete_book, update_book, get_latest_books, get_book_info, get_books_by_type
+
 
 @allure.feature('Books API')
 class TestBooksAPI:
 
     @allure.story('Add Book')
-    def test_add_book(self, api_client):
-        new_book = {
-            'title': 'Book1',
-            'type': 'Satire',
-            'creation_date': '2021-01-02'
-        }
-        response = api_client.post('manipulation', json=new_book)
+    def test_add_new_book(self, api_client):
+        response = add_book(api_client, 'Book1', 'Satire', '2021-01-02')
         assert_that(response.status_code).is_equal_to(200)
         response_json = response.json()
-        assert_that(response_json['title']).is_equal_to(new_book['title'])
-        assert_that(response_json['type']).is_equal_to(new_book['type'])
-        assert_that(response_json['creation_date']).is_equal_to(new_book['creation_date'])
+        assert_that(response_json['title']).is_equal_to('Book1')
+        assert_that(response_json['type']).is_equal_to('Satire')
+        assert_that(response_json['creation_date']).is_equal_to('2021-01-02')
         assert_that(response_json['id']).is_not_empty()
 
     @allure.story('Delete Book')
     def test_delete_book(self, api_client):
-        new_book = {
-            'title': 'BookToDelete',
-            'type': 'Drama',
-            'creation_date': '2021-02-02'
-        }
-        add_response = api_client.post('manipulation', json=new_book)
+        add_response = add_book(api_client, 'BookToDelete', 'Drama', '2021-02-02')
+        assert_that(add_response.status_code).is_equal_to(200)
+
         book_id = add_response.json()['id']
         book_title = add_response.json()['title']
-        delete_response = api_client.delete('manipulation', params={'id': book_id})
+
+        delete_response = delete_book(api_client, book_id)
         assert_that(delete_response.status_code).is_equal_to(200)
         assert_that(delete_response.json()['id']).is_equal_to(book_id)
         assert_that(delete_response.json()['title']).is_equal_to(book_title)
 
     @allure.story('Update Book')
     def test_update_book(self, api_client):
-        new_book = {
-            'title': 'BookToUpdate',
-            'type': 'Science',
-            'creation_date': '2021-03-03'
-        }
-        add_response = api_client.post('manipulation', json=new_book)
+        add_response = add_book(api_client, 'BookToUpdate', 'Science', '2021-03-03')
         assert_that(add_response.status_code).is_equal_to(200)
+
         book_id = add_response.json()['id']
+
         updated_title = 'UpdatedBookTitle'
-        update_response = api_client.put('manipulation', params={'id': book_id}, json={'title': updated_title})
+        update_response = update_book(api_client, book_id, updated_title)
+
         assert_that(update_response.status_code).is_equal_to(200)
         response_data = update_response.json()
         assert_that(response_data['title']).is_equal_to(updated_title)
@@ -60,7 +53,7 @@ class TestBooksAPI:
     @allure.story('Get Latest Books')
     @pytest.mark.parametrize('limit', [1, 5, 10])
     def test_get_latest_books(self, api_client, limit):
-        response = api_client.get('latest', params={'limit': limit})
+        response = get_latest_books(api_client, limit)
         assert_that(response.status_code).is_equal_to(200)
         response_data = response.json()
         assert_that(response_data).is_instance_of(list)
@@ -68,25 +61,24 @@ class TestBooksAPI:
 
     @allure.story('Get Book Info')
     def test_get_book_info(self, api_client):
-        new_book = {
-            'title': 'BookInfo',
-            'type': 'Romance',
-            'creation_date': '2021-04-04'
-        }
-        add_response = api_client.post('manipulation', json=new_book)
+        add_response = add_book(api_client, 'MyBook1', 'Science', '2021-03-03')
+        assert_that(add_response.status_code).is_equal_to(200)
         book_id = add_response.json()['id']
-        response = api_client.get('info', params={'id': book_id})
+
+        response = get_book_info(api_client, book_id)
+
         assert_that(response.status_code).is_equal_to(200)
         response_data = response.json()
         assert_that(response_data['id']).is_equal_to(book_id)
-        assert_that(response_data['title']).is_equal_to(new_book['title'])
-        assert_that(response_data['type']).is_equal_to(new_book['type'])
+        assert_that(response_data['title']).is_equal_to('MyBook1')
+        assert_that(response_data['type']).is_equal_to('Science')
 
     @allure.story('Get Book IDs by Type')
     @pytest.mark.parametrize('book_type', ['Science', 'Satire', 'Drama', 'Romance'])
     def test_get_book_ids_by_type(self, api_client, book_type):
-        response = api_client.get('ids', params={'book_type': book_type})
+        response = get_books_by_type(api_client, book_type)
         assert_that(response.status_code).is_equal_to(200)
+
         response_data = response.json()
         assert_that(response_data).is_instance_of(list)
         for book in response_data:
