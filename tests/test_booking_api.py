@@ -1,11 +1,8 @@
-# tests/test_booking_api.py
 import pytest
 import allure
 from assertpy import assert_that
-from datetime import datetime
 import uuid
-import requests.exceptions  # This is the required import
-
+import requests.exceptions
 from tests.helpers import add_book, delete_book, update_book, get_latest_books, get_book_info, get_books_by_type
 
 
@@ -26,25 +23,19 @@ class TestBooksAPI:
     def test_delete_book(self, api_client):
         add_response = add_book(api_client, 'BookToDelete', 'Drama', '2021-02-02')
         assert_that(add_response.status_code).is_equal_to(200)
-
         book_id = add_response.json()['id']
-        book_title = add_response.json()['title']
-
         delete_response = delete_book(api_client, book_id)
         assert_that(delete_response.status_code).is_equal_to(200)
         assert_that(delete_response.json()['id']).is_equal_to(book_id)
-        assert_that(delete_response.json()['title']).is_equal_to(book_title)
+        assert_that(delete_response.json()['title']).is_equal_to('BookToDelete')
 
     @allure.story('Update Book')
     def test_update_book(self, api_client):
         add_response = add_book(api_client, 'BookToUpdate', 'Science', '2021-03-03')
         assert_that(add_response.status_code).is_equal_to(200)
-
         book_id = add_response.json()['id']
-
         updated_title = 'UpdatedBookTitle'
         update_response = update_book(api_client, book_id, updated_title)
-
         assert_that(update_response.status_code).is_equal_to(200)
         response_data = update_response.json()
         assert_that(response_data['title']).is_equal_to(updated_title)
@@ -61,24 +52,21 @@ class TestBooksAPI:
 
     @allure.story('Get Book Info')
     def test_get_book_info(self, api_client):
-        add_response = add_book(api_client, 'MyBook1', 'Science', '2021-03-03')
+        add_response = add_book(api_client, 'BookInfo', 'Romance', '2021-04-04')
         assert_that(add_response.status_code).is_equal_to(200)
         book_id = add_response.json()['id']
-
         response = get_book_info(api_client, book_id)
-
         assert_that(response.status_code).is_equal_to(200)
         response_data = response.json()
         assert_that(response_data['id']).is_equal_to(book_id)
-        assert_that(response_data['title']).is_equal_to('MyBook1')
-        assert_that(response_data['type']).is_equal_to('Science')
+        assert_that(response_data['title']).is_equal_to('BookInfo')
+        assert_that(response_data['type']).is_equal_to('Romance')
 
     @allure.story('Get Book IDs by Type')
     @pytest.mark.parametrize('book_type', ['Science', 'Satire', 'Drama', 'Romance'])
     def test_get_book_ids_by_type(self, api_client, book_type):
         response = get_books_by_type(api_client, book_type)
         assert_that(response.status_code).is_equal_to(200)
-
         response_data = response.json()
         assert_that(response_data).is_instance_of(list)
         for book in response_data:
@@ -92,7 +80,6 @@ class TestBooksAPI:
         }
         with pytest.raises(requests.exceptions.HTTPError) as exc_info:
             api_client.post('manipulation', json=new_book)
-
         response = exc_info.value.response
         assert_that(response.status_code).is_equal_to(400)
         assert_that(response.json()['message']).is_equal_to('The request is not valid.')
@@ -102,7 +89,6 @@ class TestBooksAPI:
         book_id = str(uuid.uuid4())
         with pytest.raises(requests.exceptions.HTTPError) as exc_info:
             api_client.delete('manipulation', params={'id': book_id})
-
         response = exc_info.value.response
         assert_that(response.status_code).is_equal_to(404)
         assert_that(response.json()['message']).is_equal_to('There is no such book | books.')
@@ -111,10 +97,8 @@ class TestBooksAPI:
     def test_update_non_existent_book(self, api_client):
         book_id = str(uuid.uuid4())
         updated_title = 'NonExistentBookTitle'
-
         with pytest.raises(requests.exceptions.HTTPError) as exc_info:
             api_client.put('manipulation', params={'id': book_id}, json={'title': updated_title})
-
         response = exc_info.value.response
         assert_that(response.json()['message']).contains('There is no such book | books.')
         assert_that(response.status_code).is_equal_to(404)
@@ -124,7 +108,6 @@ class TestBooksAPI:
         book_id = str(uuid.uuid4())
         with pytest.raises(requests.exceptions.HTTPError) as exc_info:
             api_client.get('info', params={'id': book_id})
-
         response = exc_info.value.response
         assert_that(response.status_code).is_equal_to(404)
         assert_that(response.json()['message']).is_equal_to('There is no such book | books.')
@@ -134,7 +117,6 @@ class TestBooksAPI:
         invalid_book_type = 'NonExistentType'
         with pytest.raises(requests.exceptions.HTTPError) as exc_info:
             api_client.get('ids', params={'book_type': invalid_book_type})
-
         response = exc_info.value.response
         assert_that(response.status_code).is_equal_to(400)
         assert_that(response.json()['message']).is_equal_to('The book entity is not valid.')

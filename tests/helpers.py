@@ -40,3 +40,15 @@ def get_book_info(api_client, book_id):
     response = api_client.get('info', params={'id': book_id})
     response.raise_for_status()
     return response
+
+
+def get_all_books(api_client):
+    response = api_client.get('ids', params={})
+    response.raise_for_status()
+    return response.json()
+
+
+def remove_all_books(api_client):
+    all_books_ids = get_all_books(api_client)
+    for book in all_books_ids:
+        delete_book(api_client, book[id])
