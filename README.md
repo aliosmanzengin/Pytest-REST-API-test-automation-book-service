@@ -7,7 +7,7 @@
 ### Prerequisites
 
 - Python 3.8
-- Docker (for running the API)
+- Docker (for running the API) 
 
 ### Setup Virtual Environment
 
@@ -38,7 +38,7 @@
 2. Run the tests:
 
     ```sh
-    pytest
+    pytest --alluredir=allure-results
     ```
 
 ### Generating Allure Report
