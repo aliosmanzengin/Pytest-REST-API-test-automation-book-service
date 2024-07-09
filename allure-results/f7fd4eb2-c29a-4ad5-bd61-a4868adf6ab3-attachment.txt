@@ -1,4 +1,0 @@
-2024-07-09 18:10:12 [[32mINFO[0m] POST http://127.0.0.1:5000/v1/books/manipulation (api_client.py:80)
-2024-07-09 18:10:12 [[32mINFO[0m] Response: 200 {'type': 'Romance', 'title': 'BookInfo', 'id': '7639a953-3312-4f0a-a5cc-cbb9179fc234', 'creation_date': '2021-04-04', 'updated_date_time': '2024-07-09T16:10:12.101747'} (api_client.py:82)
-2024-07-09 18:10:12 [[32mINFO[0m] GET http://127.0.0.1:5000/v1/books/info (api_client.py:60)
-2024-07-09 18:10:12 [[32mINFO[0m] Response: 200 {'type': 'Romance', 'title': 'BookInfo', 'id': '7639a953-3312-4f0a-a5cc-cbb9179fc234', 'creation_date': '2021-04-04', 'updated_date_time': '2024-07-09T16:10:12.101747'} (api_client.py:62)

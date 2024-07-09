@@ -1,2 +1,0 @@
-2024-07-09 18:10:12 [[32mINFO[0m] GET http://127.0.0.1:5000/v1/books/latest (api_client.py:60)
-2024-07-09 18:10:12 [[32mINFO[0m] Response: 200 [{'type': 'Science', 'title': 'UpdatedBookTitle', 'id': 'f3669199-809a-441b-8f63-e47a0a71f316', 'creation_date': '2021-03-03', 'updated_date_time': '2024-07-09T16:10:12.067663'}] (api_client.py:62)

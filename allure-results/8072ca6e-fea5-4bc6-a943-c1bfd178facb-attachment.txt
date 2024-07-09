@@ -1,2 +1,0 @@
-INFO:utils.api_client:POST http://127.0.0.1:5000/v1/books/manipulation
-INFO:utils.api_client:Response: 200 {'type': 'Romance', 'title': 'Book4', 'id': '98d417b7-7e8b-4360-81cd-56e7b54a8ed5', 'creation_date': '2024-04-04', 'updated_date_time': '2024-07-09T16:10:12.043705'}
