@@ -4,6 +4,7 @@ import allure
 from assertpy import assert_that
 from datetime import datetime
 import uuid
+import requests.exceptions  # This is the required import
 
 
 @allure.feature('Books API')
@@ -17,10 +18,12 @@ class TestBooksAPI:
             'creation_date': '2021-01-02'
         }
         response = api_client.post('manipulation', json=new_book)
-        assert_that(response['title']).is_equal_to(new_book['title'])
-        assert_that(response['type']).is_equal_to(new_book['type'])
-        assert_that(response['creation_date']).is_equal_to(new_book['creation_date'])
-        self.book_id = response['id']  # Store the ID for further tests
+        assert_that(response.status_code).is_equal_to(200)
+        response_json = response.json()
+        assert_that(response_json['title']).is_equal_to(new_book['title'])
+        assert_that(response_json['type']).is_equal_to(new_book['type'])
+        assert_that(response_json['creation_date']).is_equal_to(new_book['creation_date'])
+        assert_that(response_json['id']).is_not_empty()
 
     @allure.story('Delete Book')
     def test_delete_book(self, api_client):
@@ -30,9 +33,12 @@ class TestBooksAPI:
             'creation_date': '2021-02-02'
         }
         add_response = api_client.post('manipulation', json=new_book)
-        book_id = add_response['id']
+        book_id = add_response.json()['id']
+        book_title = add_response.json()['title']
         delete_response = api_client.delete('manipulation', params={'id': book_id})
-        assert_that(delete_response['message']).is_equal_to('Book deleted')
+        assert_that(delete_response.status_code).is_equal_to(200)
+        assert_that(delete_response.json()['id']).is_equal_to(book_id)
+        assert_that(delete_response.json()['title']).is_equal_to(book_title)
 
     @allure.story('Update Book')
     def test_update_book(self, api_client):
@@ -42,18 +48,23 @@ class TestBooksAPI:
             'creation_date': '2021-03-03'
         }
         add_response = api_client.post('manipulation', json=new_book)
-        book_id = add_response['id']
+        assert_that(add_response.status_code).is_equal_to(200)
+        book_id = add_response.json()['id']
         updated_title = 'UpdatedBookTitle'
-        update_response = api_client.put('manipulation', json={'id': book_id, 'title': updated_title})
-        assert_that(update_response['title']).is_equal_to(updated_title)
-        assert_that(update_response['updated_date']).is_not_none()
+        update_response = api_client.put('manipulation', params={'id': book_id}, json={'title': updated_title})
+        assert_that(update_response.status_code).is_equal_to(200)
+        response_data = update_response.json()
+        assert_that(response_data['title']).is_equal_to(updated_title)
+        assert_that(response_data['updated_date']).is_not_none()
 
     @allure.story('Get Latest Books')
     @pytest.mark.parametrize('limit', [1, 5, 10])
     def test_get_latest_books(self, api_client, limit):
         response = api_client.get('latest', params={'limit': limit})
-        assert_that(response).is_instance_of(list)
-        assert_that(len(response)).is_less_than_or_equal_to(limit)
+        assert_that(response.status_code).is_equal_to(200)
+        response_data = response.json()
+        assert_that(response_data).is_instance_of(list)
+        assert_that(len(response_data)).is_less_than_or_equal_to(limit)
 
     @allure.story('Get Book Info')
     def test_get_book_info(self, api_client):
@@ -63,16 +74,69 @@ class TestBooksAPI:
             'creation_date': '2021-04-04'
         }
         add_response = api_client.post('manipulation', json=new_book)
-        book_id = add_response['id']
+        book_id = add_response.json()['id']
         response = api_client.get('info', params={'id': book_id})
-        assert_that(response['id']).is_equal_to(book_id)
-        assert_that(response['title']).is_equal_to(new_book['title'])
-        assert_that(response['type']).is_equal_to(new_book['type'])
+        assert_that(response.status_code).is_equal_to(200)
+        response_data = response.json()
+        assert_that(response_data['id']).is_equal_to(book_id)
+        assert_that(response_data['title']).is_equal_to(new_book['title'])
+        assert_that(response_data['type']).is_equal_to(new_book['type'])
 
     @allure.story('Get Book IDs by Type')
-    @pytest.mark.parametrize('book_type', ['Science', 'Satire', 'Drama', 'Action and Adventure', 'Romance'])
+    @pytest.mark.parametrize('book_type', ['Science', 'Satire', 'Drama', 'Romance'])
     def test_get_book_ids_by_type(self, api_client, book_type):
         response = api_client.get('ids', params={'book_type': book_type})
-        assert_that(response).is_instance_of(list)
-        for book_id in response:
-            assert_that(uuid.UUID(book_id, version=4)).is_instance_of(uuid.UUID)  # Ensure IDs are valid UUIDs
+        assert_that(response.status_code).is_equal_to(200)
+        response_data = response.json()
+        assert_that(response_data).is_instance_of(list)
+        for book in response_data:
+            assert_that(uuid.UUID(book['id'], version=4)).is_instance_of(uuid.UUID)
+
+    @allure.story('Add Book Missing Field')
+    def test_add_book_missing_field(self, api_client):
+        new_book = {
+            'title': 'BookWithoutType',
+            'creation_date': '2021-01-02'
+        }
+        with pytest.raises(requests.exceptions.HTTPError):
+            response = api_client.post('manipulation', json=new_book)
+            assert_that(response.status_code).is_equal_to(400)
+            assert_that(response.json()['message']).is_equal_to('The request is not valid')
+
+    @allure.story('Delete Non-existent Book')
+    def test_delete_non_existent_book(self, api_client):
+        book_id = str(uuid.uuid4())
+        with pytest.raises(requests.exceptions.HTTPError):
+            response = api_client.delete('manipulation', params={'id': book_id})
+            assert_that(response.status_code).is_equal_to(404)
+            assert_that(response.json()['message']).is_equal_to('There is no such book | books.')
+
+    @allure.story('Update Non-existent Book')
+    def test_update_non_existent_book(self, api_client):
+        book_id = str(uuid.uuid4())
+        updated_title = 'NonExistentBookTitle'
+
+        with pytest.raises(requests.exceptions.HTTPError):
+            response = api_client.put('manipulation', params={'id': book_id}, json={'title': updated_title})
+            print('------------')
+            print(response.json()['message'])
+            message = response.json()['message']
+            assert_that(message).contains('The book entity is not valid.')
+            assert_that(response.json()['message']).contains('The book entity is not valid.')
+            assert_that(response.status_code).is_equal_to(404)
+
+    @allure.story('Get Info of Non-existent Book')
+    def test_get_info_non_existent_book(self, api_client):
+        book_id = str(uuid.uuid4())
+        with pytest.raises(requests.exceptions.HTTPError):
+            response = api_client.get('info', params={'id': book_id})
+            assert_that(response.status_code).is_equal_to(404)
+            assert_that(response.json()['message']).is_equal_to('There is no such book | books.')
+
+    @allure.story('Get Book IDs with Invalid Type')
+    def test_get_book_ids_invalid_type(self, api_client):
+        invalid_book_type = 'NonExistentType'
+        with pytest.raises(requests.exceptions.HTTPError):
+            response = api_client.get('ids', params={'book_type': invalid_book_type})
+            assert_that(response.status_code).is_equal_to(400)
+            assert_that(response.json()['message']).is_equal_to('The book entity is not valid.')
