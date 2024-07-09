@@ -70,6 +70,5 @@ reports/
 # VS Code
 .vscode/
 
-
+# Pycharm
 .idea/
-.idea
