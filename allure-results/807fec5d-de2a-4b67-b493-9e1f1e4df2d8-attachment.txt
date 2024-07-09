@@ -1,0 +1,2 @@
+2024-07-09 18:10:12 [[32mINFO[0m] POST http://127.0.0.1:5000/v1/books/manipulation (api_client.py:80)
+2024-07-09 18:10:12 [[32mINFO[0m] Response: 200 {'type': 'Satire', 'title': 'Book2', 'id': '6ee93e5f-69b5-4ce4-8e95-60bb4a882d33', 'creation_date': '2024-02-02', 'updated_date_time': '2024-07-09T16:10:12.023504'} (api_client.py:82)

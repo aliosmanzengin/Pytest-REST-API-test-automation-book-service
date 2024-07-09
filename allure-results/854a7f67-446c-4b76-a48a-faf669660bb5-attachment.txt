@@ -1,0 +1,2 @@
+INFO:utils.api_client:GET http://127.0.0.1:5000/v1/books/ids
+INFO:utils.api_client:Response: 200 [{'type': 'Science', 'title': 'Book1', 'id': '1559769c-d53e-4e6e-b293-c6669a4c82e4', 'creation_date': '2024-01-01', 'updated_date_time': '2024-07-09T16:10:12.005998'}, {'type': 'Science', 'title': 'UpdatedBookTitle', 'id': 'f3669199-809a-441b-8f63-e47a0a71f316', 'creation_date': '2021-03-03', 'updated_date_time': '2024-07-09T16:10:12.067663'}]

@@ -1,0 +1,2 @@
+2024-07-09 18:10:12 [[32mINFO[0m] GET http://127.0.0.1:5000/v1/books/ids (api_client.py:60)
+2024-07-09 18:10:12 [[32mINFO[0m] Response: 200 [{'type': 'Drama', 'title': 'Book3', 'id': '7bb9e3da-17dc-4777-a7f2-a8b14aca31f6', 'creation_date': '2024-03-03', 'updated_date_time': '2024-07-09T16:10:12.035742'}] (api_client.py:62)

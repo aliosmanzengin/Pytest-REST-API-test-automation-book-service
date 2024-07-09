@@ -1,0 +1,4 @@
+INFO:utils.api_client:POST http://127.0.0.1:5000/v1/books/manipulation
+INFO:utils.api_client:Response: 200 {'type': 'Drama', 'title': 'BookToDelete', 'id': 'd66a80b0-278c-4ed3-a328-c3a61570ade0', 'creation_date': '2021-02-02', 'updated_date_time': '2024-07-09T16:10:12.050239'}
+INFO:utils.api_client:DELETE http://127.0.0.1:5000/v1/books/manipulation
+INFO:utils.api_client:Response: 200 {'type': 'Drama', 'title': 'BookToDelete', 'id': 'd66a80b0-278c-4ed3-a328-c3a61570ade0', 'creation_date': '2021-02-02', 'updated_date_time': '2024-07-09T16:10:12.050239'}
